@@ -1,7 +1,7 @@
 export type Coffee = {
+    id: number;
     nome: string;
     tipo: string;
-    id: number;
     descricao: string;
     preco: number;
     tag: string[] ;
