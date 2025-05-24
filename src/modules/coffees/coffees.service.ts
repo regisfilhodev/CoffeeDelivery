@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Coffee } from './types/Coffees';
+import { CoffeeDto } from './types/Coffees';
 
 const coffeeList = [
   {
@@ -32,28 +32,27 @@ const coffeeList = [
 ]  
 
 @Injectable()
-export class AppService {
+export class CoffeesService {
 
-  getHello(): string {
-    return 'Lista de cafés';
-  }
-  getCoffee(): Coffee[] {
+  getCoffee(): CoffeeDto[] {
     return coffeeList;
   }
-  getCoffeeId(id: number): Coffee[] {
-    const coffee = coffeeList.filter(coffee => coffee.id === Number(id))
-    if (coffee.length === 0) {
+  getCoffeeId(id: number): CoffeeDto {
+    const existcoffee = coffeeList.find(coffee => coffee.id === Number(id))
+
+    if (!existcoffee) {
       throw new NotFoundException(`Café com ID ${id} não encontrado!`);
     }
-    return coffee;   
+
+    return existcoffee;   
   }
-  postCoffee(coffee: Coffee): Coffee[] {
+  postCoffee(coffee: CoffeeDto) {
     const coffeeExists = coffeeList.some(c => c.id === coffee.id);
     if (coffeeExists) {
       throw new ConflictException(`Café com ID ${coffee.id} já existe!`);
     }
     coffeeList.push(coffee)
-
-    return coffeeList;
+    
+    return ;
   }
 }
