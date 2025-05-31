@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsArray } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsDate, IsOptional } from 'class-validator';
 
 export class CoffeeDto  {
     @IsNumber()
@@ -21,4 +21,8 @@ export class CoffeeDto  {
 
     @IsNumber()
     quantidade: number;
+
+    @IsString()
+    @IsOptional()
+    date_create: string;
 }
