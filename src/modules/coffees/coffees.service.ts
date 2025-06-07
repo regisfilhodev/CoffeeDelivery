@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CoffeeDto } from './types/Coffees';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 const coffeeList = [
   {
@@ -37,55 +38,80 @@ const coffeeList = [
 
 @Injectable()
 export class CoffeesService {
+  constructor(private prisma: PrismaService) {}
 
-  getCoffee(): CoffeeDto[] {
-    return coffeeList;
+  async getCoffee() {
+    return this.prisma.cafe.findMany({
+      include: {
+        tags: true
+      }
+    });
   }
 
-  getCoffeeId(id: number): CoffeeDto {
-    const existcoffee = coffeeList.find(coffee => coffee.id === Number(id))
+  async getCoffeeId(id: number) {
+    const coffee = await this.prisma.cafe.findUnique({
+      where: { id },
+      include: {
+        tags: true
+      }
+    });
 
-    if (!existcoffee) {
+    if (!coffee) {
       throw new NotFoundException(`Café com ID ${id} não encontrado!`);
     }
-    return existcoffee;   
+    return coffee;
   }
 
-  postCoffee(coffee: CoffeeDto) {
-    const coffeeExists = coffeeList.some(c => c.id === coffee.id);
+  async postCoffee(coffee: CoffeeDto) {
+    const coffeeExists = await this.prisma.cafe.findFirst({
+      where: { nome: coffee.nome }
+    });
+
     if (coffeeExists) {
-      throw new ConflictException(`Café com ID ${coffee.id} já existe!`);
+      throw new ConflictException(`Café com nome ${coffee.nome} já existe!`);
     }
-
-    coffee.date_create = new Date().toISOString()
-    coffeeList.push(coffee)
     
-    return ;
+    const newCoffee = await this.prisma.cafe.create({
+      data: {
+        nome: coffee.nome,
+        tipo: coffee.tipo,
+        preco: coffee.preco,
+        descricao: coffee.descricao,
+        tags: {
+          create: coffee.tags?.map(tag => ({ nome: tag }))
+        }
+      },
+      include: {
+        tags: true
+      }
+    });
+    
+    return newCoffee;
   }
 
-  coffeeQueryAll(
+  async coffeeQueryAll(
     startDateString?: string,
     endDateString?: string,
-  ): CoffeeDto[] {
-    let filteredCoffees = [...coffeeList];
+  ) {
+    const where: any = {};
 
-    const startDate = startDateString ? new Date(startDateString) : null;
-    const endDate = endDateString ? new Date(endDateString) : null;
-
-    if (startDate) {
-      filteredCoffees = filteredCoffees.filter((coffee) => {
-        const coffeeDate = new Date(coffee.date_create);
-        return coffeeDate >= startDate;
-      });
+    if (startDateString || endDateString) {
+      where.dataPedido = {};
+      
+      if (startDateString) {
+        where.dataPedido.gte = new Date(startDateString);
+      }
+      
+      if (endDateString) {
+        where.dataPedido.lte = new Date(endDateString);
+      }
     }
 
-    if (endDate) {
-      filteredCoffees = filteredCoffees.filter((coffee) => {
-        const coffeeDate = new Date(coffee.date_create);
-        return coffeeDate <= endDate;
-      });
-    }
-
-    return filteredCoffees;
+    return this.prisma.cafe.findMany({
+      where,
+      include: {
+        tags: true
+      }
+    });
   }
 }

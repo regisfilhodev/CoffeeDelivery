@@ -1,9 +1,6 @@
-import { IsString, IsNumber, IsArray, IsDate, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsOptional } from 'class-validator';
 
-export class CoffeeDto  {
-    @IsNumber()
-    id: number;
-
+export class CreateCoffeeDto {
     @IsString()
     nome: string;
 
@@ -17,12 +14,12 @@ export class CoffeeDto  {
     preco: number;
 
     @IsArray()
-    tag: string[];
-
-    @IsNumber()
-    quantidade: number;
-
-    @IsString()
     @IsOptional()
-    date_create: string;
+    tags?: string[];
+}
+
+export class CoffeeDto extends CreateCoffeeDto {
+    @IsNumber()
+    @IsOptional()
+    id?: number;
 }
