@@ -28,7 +28,7 @@ model TagCafe {
   id     Int    @id @default(autoincrement())
   nome   String
   cafeId Int
-  cafe   Cafe   @relation(fields: [cafeId], references: [id])
+  cafe   Cafe   @relation(fields: [cafeId], references: [id], onDelete: Cascade)
 }
 
 model Pedido {
@@ -43,9 +43,9 @@ model Pedido {
 
 model ItemPedido {
   id            Int     @id @default(autoincrement())
-  cafe          Cafe    @relation(fields: [cafeId], references: [id])
+  cafe          Cafe    @relation(fields: [cafeId], references: [id], onDelete: Cascade)
   cafeId        Int
-  pedido        Pedido  @relation(fields: [pedidoId], references: [id])
+  pedido        Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
   pedidoId      Int
   quantidade    Int
   precoUnitario Decimal
@@ -56,7 +56,7 @@ model Entrega {
   enderecoEntrega     String
   status              StatusEntrega @default(PENDENTE)
   dataPrevistaEntrega DateTime
-  pedido              Pedido        @relation(fields: [pedidoId], references: [id])
+  pedido              Pedido        @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
   pedidoId            Int           @unique
 }
 
